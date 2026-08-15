@@ -1,0 +1,21 @@
+{
+  "name": "crossout-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Backend logic and Supabase schema for Crossout — Phase 1",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "generate-instances": "tsx --env-file=.env scripts/generateInstances.ts",
+    "generate-insight": "tsx --env-file=.env scripts/generateInsight.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "openai": "^4.68.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2"
+  }
+}
