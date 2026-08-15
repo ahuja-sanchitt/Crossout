@@ -34,13 +34,3 @@ npm run generate-instances          # generates today's instances
 npm run generate-instances -- 2026-08-16
 npm run generate-insight            # generates (or returns cached) today's insight
 ```
-
-You'll need at least one task row in `tasks` for `generate-instances` to have anything
-to do — insert one directly in the Supabase table editor for now (the Tasks page will
-do this once the frontend exists).
-
-## Not built yet
-
-Everything UI-facing — Next.js app, auth pages, the four screens from the mockup, and
-the API routes that will wrap these `lib/` functions for a browser to call. See
-`~/.claude/plans/atomic-growing-pumpkin.md` for the full plan.
