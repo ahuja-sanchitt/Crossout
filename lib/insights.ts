@@ -1,8 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
-import { env } from './env.js';
-import { getStreakSummary } from './streak.js';
-import type { DayRow, InsightRow, InsightStatsSnapshot, TaskInstanceRow, TimeOfDay } from './types.js';
+import { env } from './env';
+import { getStreakSummary } from './streak';
+import type { DayRow, InsightRow, InsightStatsSnapshot, TaskInstanceRow, TimeOfDay } from './types';
 
 const RANGE_DAYS = 7;
 

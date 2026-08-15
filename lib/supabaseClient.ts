@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { env } from './env.js';
+import { env } from './env';
 
 // Service-role client for backend scripts/logic — bypasses RLS, so every
 // query here must filter by user_id explicitly. Once a frontend exists it

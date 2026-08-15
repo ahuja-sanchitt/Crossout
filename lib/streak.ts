@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { DayRow } from './types.js';
+import type { DayRow } from './types';
 
 export interface StreakSummary {
   currentStreak: number;

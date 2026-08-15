@@ -1,9 +1,9 @@
 // Generates (or returns the cached) daily insight for today.
 //
 //   npm run generate-insight -- 2026-08-16
-import { createServiceClient } from '../lib/supabaseClient.js';
-import { env } from '../lib/env.js';
-import { getOrGenerateDailyInsight } from '../lib/insights.js';
+import { createServiceClient } from '../lib/supabaseClient';
+import { env } from '../lib/env';
+import { getOrGenerateDailyInsight } from '../lib/insights';
 
 async function main() {
   const date = process.argv[2] ?? new Date().toISOString().slice(0, 10);

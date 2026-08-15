@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { RecurrenceRule, TaskRow } from './types.js';
+import type { RecurrenceRule, TaskRow } from './types';
 
 function ruleMatchesDate(rule: RecurrenceRule, date: Date): boolean {
   if (rule.freq === 'daily') return true;
@@ -34,6 +34,9 @@ export async function generateInstancesForDate(
     .select('*')
     .eq('user_id', userId)
     .eq('is_active', true)
+    // subtasks (parent_task_id set) are informational under their parent in
+    // Phase 1 — they don't get their own instance/checkbox on the day view
+    .is('parent_task_id', null)
     .or(`recurrence_rule.not.is.null,due_date.eq.${date}`);
 
   if (error) throw error;

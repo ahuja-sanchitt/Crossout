@@ -6,9 +6,9 @@
 //
 // With no argument, defaults to today (useful for the lazy-fallback case
 // and for backfilling manually).
-import { createServiceClient } from '../lib/supabaseClient.js';
-import { env } from '../lib/env.js';
-import { generateInstancesForDate } from '../lib/instances.js';
+import { createServiceClient } from '../lib/supabaseClient';
+import { env } from '../lib/env';
+import { generateInstancesForDate } from '../lib/instances';
 
 async function main() {
   const date = process.argv[2] ?? new Date().toISOString().slice(0, 10);

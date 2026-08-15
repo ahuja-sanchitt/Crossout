@@ -1,20 +1,35 @@
 {
-  "name": "crossout-backend",
+  "name": "crossout",
   "version": "0.1.0",
   "private": true,
-  "description": "Backend logic and Supabase schema for Crossout — Phase 1",
+  "description": "Crossout — a daily task tracker with streaks and AI insights",
   "type": "module",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "generate-instances": "tsx --env-file=.env scripts/generateInstances.ts",
     "generate-insight": "tsx --env-file=.env scripts/generateInsight.ts"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.45.4",
-    "openai": "^4.68.0"
+    "next": "^16.3.1",
+    "openai": "^4.68.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.13.0",
+    "eslint-config-next": "^16.3.1",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
     "tsx": "^4.19.1",
     "typescript": "^5.6.2"
   }
