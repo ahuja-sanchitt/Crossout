@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { quickAddTask, toggleTaskInstance, useEmergencyPassAction } from '@/app/(app)/today-actions';
+import { DayCompleteCelebration } from '@/components/DayCompleteCelebration';
 import { TIME_OF_DAY_LABEL, TIME_OF_DAY_ORDER, currentTimeOfDay } from '@/lib/timeOfDay';
 import type { DayStatus, Priority, TimeOfDay } from '@/lib/types';
 
@@ -27,14 +28,44 @@ export function TodayView({
   dayStatus,
   instances,
   passesRemaining,
+  currentStreak,
 }: {
   dateLabel: string;
   dayStatus: DayStatus;
   instances: TodayInstance[];
   passesRemaining: number;
+  currentStreak: number;
 }) {
   const total = instances.length;
-  const done = instances.filter((i) => i.completed).length;
+
+  // Lifted so we can detect "last task just checked off" client-side, the
+  // instant it happens — waiting on dayStatus from the server round-trip
+  // (via revalidatePath) would lag a beat behind the actual click.
+  const [completedIds, setCompletedIds] = useState(
+    () => new Set(instances.filter((i) => i.completed).map((i) => i.instanceId)),
+  );
+  const done = completedIds.size;
+  const wasAlreadyComplete = useRef(dayStatus === 'complete' || dayStatus === 'excused');
+  const [celebrating, setCelebrating] = useState(false);
+
+  useEffect(() => {
+    const allDone = total > 0 && done === total;
+    if (allDone && !wasAlreadyComplete.current) {
+      setCelebrating(true);
+    }
+    wasAlreadyComplete.current = allDone;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done, total]);
+
+  function handleToggle(instanceId: string, next: boolean) {
+    setCompletedIds((prev) => {
+      const copy = new Set(prev);
+      if (next) copy.add(instanceId);
+      else copy.delete(instanceId);
+      return copy;
+    });
+  }
+
   const groups = TIME_OF_DAY_ORDER.map((tod) => ({
     timeOfDay: tod,
     items: instances.filter((i) => i.timeOfDay === tod),
@@ -42,6 +73,10 @@ export function TodayView({
 
   return (
     <div>
+      {celebrating && (
+        <DayCompleteCelebration streak={currentStreak + 1} onDismiss={() => setCelebrating(false)} />
+      )}
+
       <div className="mb-7 flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="mb-1 font-mono text-[0.7rem] uppercase tracking-[0.11em] text-ink-faint">
@@ -90,7 +125,12 @@ export function TodayView({
           </div>
           <div className="overflow-hidden rounded-lg border border-border bg-surface">
             {group.items.map((item) => (
-              <TaskRow key={item.instanceId} item={item} />
+              <TaskRow
+                key={item.instanceId}
+                item={item}
+                completed={completedIds.has(item.instanceId)}
+                onToggle={handleToggle}
+              />
             ))}
           </div>
         </div>
@@ -99,13 +139,20 @@ export function TodayView({
   );
 }
 
-function TaskRow({ item }: { item: TodayInstance }) {
+function TaskRow({
+  item,
+  completed,
+  onToggle,
+}: {
+  item: TodayInstance;
+  completed: boolean;
+  onToggle: (instanceId: string, next: boolean) => void;
+}) {
   const [isPending, startTransition] = useTransition();
-  const [optimisticCompleted, setOptimisticCompleted] = useState(item.completed);
 
-  function handleToggle() {
-    const next = !optimisticCompleted;
-    setOptimisticCompleted(next);
+  function handleClick() {
+    const next = !completed;
+    onToggle(item.instanceId, next);
     startTransition(async () => {
       await toggleTaskInstance(item.instanceId, next);
     });
@@ -115,22 +162,22 @@ function TaskRow({ item }: { item: TodayInstance }) {
     <div className="flex items-center gap-2.5 border-b border-border-soft px-3.5 py-2.5 last:border-b-0">
       <button
         type="button"
-        onClick={handleToggle}
+        onClick={handleClick}
         disabled={isPending}
-        aria-pressed={optimisticCompleted}
-        aria-label={optimisticCompleted ? `Mark "${item.title}" not done` : `Mark "${item.title}" done`}
+        aria-pressed={completed}
+        aria-label={completed ? `Mark "${item.title}" not done` : `Mark "${item.title}" done`}
         className={`flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-[5px] border-[1.5px] ${
-          optimisticCompleted ? 'border-accent bg-accent text-accent-ink' : 'border-ink-faint'
+          completed ? 'border-accent bg-accent text-accent-ink' : 'border-ink-faint'
         }`}
       >
-        {optimisticCompleted && (
+        {completed && (
           <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" className="h-2.5 w-2.5">
             <path d="M1 5l3 3 5-6" />
           </svg>
         )}
       </button>
       <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_DOT[item.priority]}`} />
-      <span className={`flex-1 text-[0.9rem] ${optimisticCompleted ? 'text-ink-faint line-through' : 'text-ink'}`}>
+      <span className={`flex-1 text-[0.9rem] ${completed ? 'text-ink-faint line-through' : 'text-ink'}`}>
         {item.title}
       </span>
       {item.subtaskCount > 0 && (

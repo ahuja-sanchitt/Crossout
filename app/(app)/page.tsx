@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { generateInstancesForDate } from '@/lib/instances';
 import { getRemainingEmergencyPasses } from '@/lib/emergencyPass';
+import { getStreakSummary } from '@/lib/streak';
 import { todayString } from '@/lib/today';
 import { TodayView, type TodayInstance } from '@/components/TodayView';
 import type { DayRow, DayStatus, Priority, TaskRow, TimeOfDay } from '@/lib/types';
@@ -28,7 +29,7 @@ export default async function TodayPage() {
     generateInstancesForDate(supabase, user.id, tomorrow.toISOString().slice(0, 10)),
   ]);
 
-  const [instancesResult, dayResult, passesRemaining] = await Promise.all([
+  const [instancesResult, dayResult, passesRemaining, streak] = await Promise.all([
     supabase
       .from('task_instances')
       .select('id, task_id, completed_at, tasks(id, title, priority, category, time_of_day)')
@@ -36,6 +37,7 @@ export default async function TodayPage() {
       .eq('date', today),
     supabase.from('days').select('*').eq('user_id', user.id).eq('date', today).maybeSingle(),
     getRemainingEmergencyPasses(supabase, user.id),
+    getStreakSummary(supabase, user.id, today),
   ]);
 
   if (instancesResult.error) throw instancesResult.error;
@@ -88,6 +90,7 @@ export default async function TodayPage() {
       dayStatus={dayStatus}
       instances={instances}
       passesRemaining={passesRemaining}
+      currentStreak={streak.currentStreak}
     />
   );
 }
