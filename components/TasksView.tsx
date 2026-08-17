@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { createTask, deleteTask, updateTask } from '@/app/(app)/tasks-actions';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { TIME_OF_DAY_LABEL, TIME_OF_DAY_ORDER } from '@/lib/timeOfDay';
 import type { Priority, RecurrenceRule, TimeOfDay } from '@/lib/types';
 
@@ -40,6 +41,8 @@ function scheduleLabel(task: TaskListItem): string {
 
 export function TasksView({ tasks }: { tasks: TaskListItem[] }) {
   const [panel, setPanel] = useState<'closed' | 'new' | string>('closed');
+  const [deletingTask, setDeletingTask] = useState<TaskListItem | null>(null);
+  const [isDeleting, startDeleteTransition] = useTransition();
   const editingTask = typeof panel === 'string' && panel !== 'closed' && panel !== 'new'
     ? tasks.find((t) => t.id === panel) ?? null
     : null;
@@ -82,15 +85,29 @@ export function TasksView({ tasks }: { tasks: TaskListItem[] }) {
           <p className="px-4 py-6 text-sm text-ink-faint">No tasks yet — add one above.</p>
         )}
         {tasks.map((task) => (
-          <TaskRow key={task.id} task={task} onEdit={() => setPanel(task.id)} />
+          <TaskRow key={task.id} task={task} onEdit={() => setPanel(task.id)} onDelete={() => setDeletingTask(task)} />
         ))}
       </div>
+
+      {deletingTask && (
+        <ConfirmDialog
+          title={`Delete "${deletingTask.title}"?`}
+          description="This removes the task and its history. This can't be undone."
+          isPending={isDeleting}
+          onCancel={() => setDeletingTask(null)}
+          onConfirm={() => {
+            startDeleteTransition(async () => {
+              await deleteTask(deletingTask.id);
+              setDeletingTask(null);
+            });
+          }}
+        />
+      )}
     </div>
   );
 }
 
-function TaskRow({ task, onEdit }: { task: TaskListItem; onEdit: () => void }) {
-  const [isPending, startTransition] = useTransition();
+function TaskRow({ task, onEdit, onDelete }: { task: TaskListItem; onEdit: () => void; onDelete: () => void }) {
   const recurrence = recurrenceLabel(task.recurrenceRule);
 
   return (
@@ -118,15 +135,7 @@ function TaskRow({ task, onEdit }: { task: TaskListItem; onEdit: () => void }) {
         <button type="button" onClick={onEdit} className="hover:text-ink">
           Edit
         </button>
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={() => {
-            if (!confirm(`Delete "${task.title}"?`)) return;
-            startTransition(() => deleteTask(task.id));
-          }}
-          className="hover:text-red"
-        >
+        <button type="button" onClick={onDelete} className="hover:text-red">
           Delete
         </button>
       </div>
