@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { signUp } from './actions';
+import { SubmitButton } from '@/components/SubmitButton';
 
 export default async function SignupPage({
   searchParams,
@@ -47,12 +48,12 @@ export default async function SignupPage({
               className="rounded border border-border bg-surface-raised px-3 py-2 text-ink outline-none focus:border-accent"
             />
           </label>
-          <button
-            type="submit"
+          <SubmitButton
+            pendingText="Signing up…"
             className="mt-2 rounded bg-accent px-3 py-2 text-sm font-semibold text-accent-ink"
           >
             Sign up
-          </button>
+          </SubmitButton>
         </form>
 
         <p className="mt-5 text-sm text-ink-faint">
