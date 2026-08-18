@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { createTask, deleteTask, updateTask } from '@/app/(app)/tasks-actions';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { Spinner } from '@/components/Spinner';
 import { TIME_OF_DAY_LABEL, TIME_OF_DAY_ORDER } from '@/lib/timeOfDay';
 import type { Priority, RecurrenceRule, TimeOfDay } from '@/lib/types';
 
@@ -270,11 +271,12 @@ function TaskForm({ task, onDone }: { task?: TaskListItem; onDone: () => void })
         <button
           type="submit"
           disabled={isPending}
-          className="rounded bg-accent px-3.5 py-2 text-[0.85rem] font-semibold text-accent-ink"
+          className="flex items-center gap-1.5 rounded bg-accent px-3.5 py-2 text-[0.85rem] font-semibold text-accent-ink disabled:opacity-70"
         >
-          {task ? 'Save changes' : 'Create task'}
+          {isPending && <Spinner className="h-3 w-3" />}
+          {isPending ? 'Saving…' : task ? 'Save changes' : 'Create task'}
         </button>
-        <button type="button" onClick={onDone} className="text-[0.82rem] text-ink-faint">
+        <button type="button" onClick={onDone} disabled={isPending} className="text-[0.82rem] text-ink-faint">
           Cancel
         </button>
       </div>

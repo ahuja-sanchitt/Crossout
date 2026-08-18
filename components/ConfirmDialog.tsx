@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { Spinner } from '@/components/Spinner';
 
 export function ConfirmDialog({
   title,
@@ -57,8 +58,9 @@ export function ConfirmDialog({
             type="button"
             disabled={isPending}
             onClick={onConfirm}
-            className="rounded-md bg-red px-3.5 py-1.5 text-[0.82rem] font-semibold text-accent-ink disabled:opacity-60"
+            className="flex items-center gap-1.5 rounded-md bg-red px-3.5 py-1.5 text-[0.82rem] font-semibold text-accent-ink disabled:opacity-60"
           >
+            {isPending && <Spinner className="h-3 w-3" />}
             {isPending ? 'Deleting…' : confirmLabel}
           </button>
         </div>

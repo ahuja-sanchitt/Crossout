@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { quickAddTask, toggleTaskInstance, useEmergencyPassAction } from '@/app/(app)/today-actions';
 import { DayCompleteCelebration } from '@/components/DayCompleteCelebration';
+import { Spinner } from '@/components/Spinner';
 import { TIME_OF_DAY_LABEL, TIME_OF_DAY_ORDER, currentTimeOfDay } from '@/lib/timeOfDay';
 import type { DayStatus, Priority, TimeOfDay } from '@/lib/types';
 
@@ -257,13 +258,15 @@ function AddTaskButton() {
       <button
         type="submit"
         disabled={isPending}
-        className="rounded bg-accent px-3.5 py-2 text-[0.85rem] font-semibold text-accent-ink"
+        className="flex items-center gap-1.5 rounded bg-accent px-3.5 py-2 text-[0.85rem] font-semibold text-accent-ink disabled:opacity-70"
       >
-        Add
+        {isPending && <Spinner className="h-3 w-3" />}
+        {isPending ? 'Adding…' : 'Add'}
       </button>
       <button
         type="button"
         onClick={() => setOpen(false)}
+        disabled={isPending}
         className="text-[0.8rem] text-ink-faint"
       >
         Cancel
@@ -311,11 +314,12 @@ function EmergencyPassButton({ passesRemaining }: { passesRemaining: number }) {
       <button
         type="submit"
         disabled={isPending}
-        className="rounded bg-amber px-3 py-1.5 text-[0.8rem] font-semibold text-accent-ink"
+        className="flex items-center gap-1.5 rounded bg-amber px-3 py-1.5 text-[0.8rem] font-semibold text-accent-ink disabled:opacity-70"
       >
-        Confirm
+        {isPending && <Spinner className="h-3 w-3" />}
+        {isPending ? 'Confirming…' : 'Confirm'}
       </button>
-      <button type="button" onClick={() => setOpen(false)} className="text-[0.78rem] text-ink-faint">
+      <button type="button" onClick={() => setOpen(false)} disabled={isPending} className="text-[0.78rem] text-ink-faint">
         Cancel
       </button>
     </form>
