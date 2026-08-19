@@ -18,6 +18,17 @@ export interface TodayInstance {
   subtaskCount: number;
 }
 
+export interface PendingInstance {
+  instanceId: string;
+  taskId: string;
+  title: string;
+  priority: Priority;
+  category: string | null;
+  date: string;
+  daysOverdue: number;
+  subtaskCount: number;
+}
+
 const PRIORITY_DOT: Record<Priority, string> = {
   high: 'bg-red',
   med: 'bg-amber',
@@ -28,12 +39,14 @@ export function TodayView({
   dateLabel,
   dayStatus,
   instances,
+  pending,
   passesRemaining,
   currentStreak,
 }: {
   dateLabel: string;
   dayStatus: DayStatus;
   instances: TodayInstance[];
+  pending: PendingInstance[];
   passesRemaining: number;
   currentStreak: number;
 }) {
@@ -112,30 +125,36 @@ export function TodayView({
         </div>
       </div>
 
-      {groups.length === 0 && (
-        <p className="mb-6 text-sm text-ink-faint">Nothing scheduled yet — add a task to get started.</p>
-      )}
+      <div className={`grid grid-cols-1 gap-6 ${pending.length > 0 ? 'lg:grid-cols-[1fr_280px]' : ''}`}>
+        <div>
+          {groups.length === 0 && (
+            <p className="mb-6 text-sm text-ink-faint">Nothing scheduled yet — add a task to get started.</p>
+          )}
 
-      {groups.map((group) => (
-        <div key={group.timeOfDay} className="mb-6">
-          <div className="mb-2 flex items-center gap-2">
-            <span className="font-mono text-[0.7rem] uppercase tracking-[0.11em] text-ink-muted">
-              {TIME_OF_DAY_LABEL[group.timeOfDay]}
-            </span>
-            <span className="h-px flex-1 bg-border-soft" />
-          </div>
-          <div className="overflow-hidden rounded-lg border border-border bg-surface">
-            {group.items.map((item) => (
-              <TaskRow
-                key={item.instanceId}
-                item={item}
-                completed={completedIds.has(item.instanceId)}
-                onToggle={handleToggle}
-              />
-            ))}
-          </div>
+          {groups.map((group) => (
+            <div key={group.timeOfDay} className="mb-6">
+              <div className="mb-2 flex items-center gap-2">
+                <span className="font-mono text-[0.7rem] uppercase tracking-[0.11em] text-ink-muted">
+                  {TIME_OF_DAY_LABEL[group.timeOfDay]}
+                </span>
+                <span className="h-px flex-1 bg-border-soft" />
+              </div>
+              <div className="overflow-hidden rounded-lg border border-border bg-surface">
+                {group.items.map((item) => (
+                  <TaskRow
+                    key={item.instanceId}
+                    item={item}
+                    completed={completedIds.has(item.instanceId)}
+                    onToggle={handleToggle}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+
+        {pending.length > 0 && <PendingColumn items={pending} />}
+      </div>
     </div>
   );
 }
@@ -187,6 +206,77 @@ function TaskRow({
         </span>
       )}
       {item.category && <span className="text-[0.7rem] text-ink-faint">{item.category}</span>}
+    </div>
+  );
+}
+
+function PendingColumn({ items: initialItems }: { items: PendingInstance[] }) {
+  const [items, setItems] = useState(initialItems);
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="lg:sticky lg:top-8 lg:self-start">
+      <div className="mb-2 flex items-center gap-2">
+        <span className="font-mono text-[0.7rem] uppercase tracking-[0.11em] text-amber">Pending</span>
+        <span className="num text-[0.7rem] text-ink-faint">{items.length}</span>
+      </div>
+      <p className="mb-3 text-[0.72rem] text-ink-faint">Not on today&apos;s list, but not forgotten.</p>
+
+      <div className="flex flex-col gap-2">
+        {items.map((item) => (
+          <PendingCard key={item.instanceId} item={item} onDone={() => setItems((prev) => prev.filter((i) => i.instanceId !== item.instanceId))} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PendingCard({ item, onDone }: { item: PendingInstance; onDone: () => void }) {
+  const [isPending, startTransition] = useTransition();
+  const [checking, setChecking] = useState(false);
+
+  function handleClick() {
+    setChecking(true);
+    startTransition(async () => {
+      await toggleTaskInstance(item.instanceId, true);
+      onDone();
+    });
+  }
+
+  return (
+    <div className="rounded-lg border border-amber/25 bg-surface p-3">
+      <div className="flex items-start gap-2.5">
+        <button
+          type="button"
+          onClick={handleClick}
+          disabled={isPending}
+          aria-label={`Mark "${item.title}" done`}
+          className={`mt-0.5 flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-[5px] border-[1.5px] ${
+            checking ? 'border-accent bg-accent text-accent-ink' : 'border-ink-faint'
+          }`}
+        >
+          {checking && (
+            <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" className="h-2.5 w-2.5">
+              <path d="M1 5l3 3 5-6" />
+            </svg>
+          )}
+        </button>
+        <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${PRIORITY_DOT[item.priority]}`} />
+        <span className="flex-1 text-[0.87rem] leading-snug text-ink">{item.title}</span>
+      </div>
+
+      <div className="mt-2.5 flex flex-wrap items-center gap-1.5 pl-[27px]">
+        <span className="whitespace-nowrap rounded-full border border-amber/35 bg-amber/10 px-2 py-0.5 text-[0.68rem] text-amber">
+          {item.daysOverdue === 1 ? '1 day overdue' : `${item.daysOverdue} days overdue`}
+        </span>
+        {item.category && <span className="text-[0.68rem] text-ink-faint">{item.category}</span>}
+        {item.subtaskCount > 0 && (
+          <span className="rounded border border-border-soft bg-surface-raised px-1.5 py-0.5 text-[0.68rem] text-ink-faint">
+            {item.subtaskCount} subtasks
+          </span>
+        )}
+      </div>
     </div>
   );
 }
