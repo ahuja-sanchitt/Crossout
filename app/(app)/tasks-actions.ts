@@ -52,11 +52,16 @@ export async function createTask(formData: FormData) {
 
   if (error) throw error;
 
-  // if it's due today or a recurring task that matches today, make sure an
-  // instance exists right away instead of waiting for the next cron/lazy run
+  // A recurring task's instance for today, or a one-off's instance for its
+  // due date — generated immediately rather than waiting on cron/lazy runs.
+  // Matters most for a due_date in the past: nothing else would ever
+  // generate that instance, and it's how a backfilled/overdue task ends up
+  // in the Pending section instead of just not existing anywhere.
   const today = todayString();
-  if (task.due_date === today || task.recurrence_rule) {
+  if (task.recurrence_rule) {
     await generateInstancesForDate(supabase, user.id, today);
+  } else if (task.due_date) {
+    await generateInstancesForDate(supabase, user.id, task.due_date);
   }
 
   revalidatePath('/tasks');
@@ -82,8 +87,10 @@ export async function updateTask(taskId: string, formData: FormData) {
   if (error) throw error;
 
   const today = todayString();
-  if (fields.due_date === today || fields.recurrence_rule) {
+  if (fields.recurrence_rule) {
     await generateInstancesForDate(supabase, user.id, today);
+  } else if (fields.due_date) {
+    await generateInstancesForDate(supabase, user.id, fields.due_date);
   }
 
   revalidatePath('/tasks');
