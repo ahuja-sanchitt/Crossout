@@ -4,6 +4,13 @@ import { NextResponse, type NextRequest } from 'next/server';
 const PUBLIC_PATHS = ['/login', '/signup'];
 
 export async function proxy(request: NextRequest) {
+  // API routes do their own auth (Bearer token, e.g. the mobile app hitting
+  // /api/insights) — redirecting them to the /login page instead of letting
+  // them return a real 401 breaks any non-browser caller.
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
