@@ -1,17 +1,17 @@
-// Same tokens as the web app's tailwind.config.ts — kept in sync by hand since
-// there's no shared config between the two projects.
+// "Midnight Violet" palette — same tokens as the web app's tailwind.config.ts,
+// kept in sync by hand since there's no shared config between the two projects.
 export const colors = {
-  bg: '#0b0f0d',
-  surface: '#121815',
-  surfaceRaised: '#171f1b',
-  surfaceSunken: '#0e1411',
-  border: '#232f29',
-  borderSoft: '#1a2420',
-  ink: '#e7ede9',
-  inkMuted: '#93a39a',
-  inkFaint: '#5f6f66',
-  accent: '#4fbf9f',
-  accentInk: '#06170f',
+  bg: '#0b0a14',
+  surface: '#14121f',
+  surfaceRaised: '#1c1930',
+  surfaceSunken: '#0e0c18',
+  border: '#2a2745',
+  borderSoft: '#1e1b33',
+  ink: '#ece9f7',
+  inkMuted: '#a29bc2',
+  inkFaint: '#655f85',
+  accent: '#8b7bf0',
+  accentInk: '#0c0a1c',
   amber: '#e3ab5f',
   red: '#d68372',
 };

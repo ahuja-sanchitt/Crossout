@@ -1,25 +1,26 @@
 import type { Config } from 'tailwindcss';
 
-// Tokens lifted straight from the approved mockup (crossout-ui artifact) —
-// dark, focused workspace with a single teal accent, amber for the
-// emergency-pass/excused state, and a muted red for missed days.
+// "Midnight Violet" palette (chosen from the crossout-palettes options artifact) —
+// dark, focused workspace with a cool violet accent, amber for the
+// emergency-pass/excused state, and a muted red for missed days. Status colors
+// (amber/red) are semantic and stay fixed across any future accent changes.
 const config: Config = {
   content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        bg: '#0b0f0d',
-        surface: '#121815',
-        'surface-raised': '#171f1b',
-        'surface-sunken': '#0e1411',
-        border: '#232f29',
-        'border-soft': '#1a2420',
-        ink: '#e7ede9',
-        'ink-muted': '#93a39a',
-        'ink-faint': '#5f6f66',
-        accent: '#4fbf9f',
-        'accent-ink': '#06170f',
+        bg: '#0b0a14',
+        surface: '#14121f',
+        'surface-raised': '#1c1930',
+        'surface-sunken': '#0e0c18',
+        border: '#2a2745',
+        'border-soft': '#1e1b33',
+        ink: '#ece9f7',
+        'ink-muted': '#a29bc2',
+        'ink-faint': '#655f85',
+        accent: '#8b7bf0',
+        'accent-ink': '#0c0a1c',
         amber: '#e3ab5f',
         red: '#d68372',
       },
